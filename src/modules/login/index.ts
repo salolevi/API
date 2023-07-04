@@ -4,9 +4,8 @@ const PORT: Number = 3000;
 
 const app: Express = express();
 
-
 app.get('/', (req: Request, res: Response) => {
-  res.send(`Bueeenas`);
+  res.send(`Bueeenasss`);
 });
 
 
