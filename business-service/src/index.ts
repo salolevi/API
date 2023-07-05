@@ -2,7 +2,7 @@ import express, {Express, Request, Response} from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import './mongo';
-import { User } from './modules/login/models/User';
+import { User } from './models/User';
 import mongoose from 'mongoose';
 import { notFound } from './middlewares/notFound';
 dotenv.config();
@@ -25,5 +25,5 @@ app.get('/', (req: Request, res: Response) => {
 app.use(notFound);
 
 app.listen(PORT, () => {
-  console.log(`Escuchando en puerto: ${PORT}`);
+  console.log(`Escuchando en puerto: ${PORT} || Servicio de negocio`);
 })
