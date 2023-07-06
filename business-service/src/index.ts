@@ -5,6 +5,7 @@ import './mongo';
 import { User } from './models/User';
 import mongoose from 'mongoose';
 import { notFound } from './middlewares/notFound';
+import businessController from './controllers/business.controller'
 dotenv.config();
 
 const PORT: Number = Number(process.env.PORT) || 8080;
@@ -14,13 +15,10 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-  User.find({})
-    .then(result => res.json(result))
-    .catch(err => {
-      mongoose.connection.close();
-      console.error(err);
-    });
+  res.status(200).send("");
 });
+
+app.use('/business', businessController);
 
 app.use(notFound);
 

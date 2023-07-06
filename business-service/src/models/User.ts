@@ -1,11 +1,17 @@
 import mongoose, { mongo } from 'mongoose';
 const { model, Schema } = mongoose;
 
-
-const UserSchema = new Schema({
-  email: String,
-  password: String,
+interface IUser {
+  email: string,
+  password: string,
   dateJoined: Date
+}
+
+
+const UserSchema = new Schema<IUser>({
+  email: {type: String, required: true},
+  password: {type: String, required: true},
+  dateJoined: {type: Date, required: true}
 });
 
 // const newUser = new User({
@@ -14,4 +20,4 @@ const UserSchema = new Schema({
 //   dateJoined: new Date()
 // });
 
-export const User = model('User', UserSchema);
+export const User = model<IUser>('User', UserSchema);
