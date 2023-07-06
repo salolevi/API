@@ -8,7 +8,7 @@ import { notFound } from './middlewares/notFound';
 import businessController from './controllers/business.controller'
 dotenv.config();
 
-const PORT: Number = Number(process.env.PORT) || 8080;
+const PORT: Number = Number(process.env.PORT) || 8000;
 const app: Express = express();
 
 app.use(cors());
