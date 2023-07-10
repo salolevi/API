@@ -9,8 +9,6 @@ import dotenv from 'dotenv';
 import { HydratedDocument } from 'mongoose';
 dotenv.config(); //como en el archivo index.ts cargo la configuracion para poder utilizar las variables de entorno
 
-
-
 export const registerFunction = async (req: Request, res: Response, next : NextFunction) : Promise<void> => {
   try {
     let {email, password} : {email: string, password: string} = req.body; //recupero las propiedades email y password del cuerpo de la solicitud
@@ -65,32 +63,30 @@ export const loginFunction = async(req: Request, res: Response, next : NextFunct
 }
 
 export const listFunction = async (req: Request, res : Response, next : NextFunction) => {
-  const {authorization} : IncomingHttpHeaders = req.headers;
-  const JWT_KEY : string | undefined = process.env.JWT_KEY;
-  const visualizeAll : boolean = req.query.visualize === 'true'; 
-  const page : number = !visualizeAll ? (Number(req.query.page) || 0) : 0;
-  const USERS_PER_PAGE : number = visualizeAll ? Infinity : 3;
-  const queryString: string = !visualizeAll ? (req.query.queryString as string || "") : "";
-  const origin : string = process.env.NODE_ENV === 'test' ? 'test' : (req.headers.host ?? "");
-  console.log(process.env.NODE_ENV);
+  const {authorization} : IncomingHttpHeaders = req.headers; //obtengo el token jwt desde los headers
+  const JWT_KEY : string | undefined = process.env.JWT_KEY; //capturo la clave privada con la que se firmo el jwt desde las variables de entorno
+  const visualizeAll : boolean = req.query.visualize === 'true'; //flag para indicar de visualizar todos los usuarios o implementar paginacion
+  const page : number = !visualizeAll ? (Number(req.query.page) || 0) : 0; //numero de pagina obtenido desde la query del url predeterminada con valor 0
+  const USERS_PER_PAGE : number = visualizeAll ? Infinity : 3; //cantidad de usuarios por pagina, esto podria ser pasado tambien por parametro pero decidi predeterminarlo a 3 para fines practicos
+  const queryString: string = !visualizeAll ? (req.query.queryString as string || "") : ""; //la cadena de texto de busqueda por mail, filtra los resultados
+  const origin : string = process.env.NODE_ENV === 'test' ? 'test' : (req.headers.host ?? ""); //agregue esta linea cuando desarrolle los tests y que se puedan realizar peticiones al servicio de negocio utilizando el entorno de testing proveido por jest (intente defaultear el puerto que utiliza pero no hubo caso)
 
-  if (authorization && JWT_KEY) {
+  if (authorization && JWT_KEY) { //verifico que venga tanto el token como la clave privada, de no ser el caso se envia un estado 401 (sin autorizacion)
     try {
-      const decodedToken = jwt.verify(authorization?.split(' ')[1], JWT_KEY) as JwtPayload;
-      const { email } : JwtPayload = decodedToken;
-      const businessDomain : string = process.env.BUSINESS_MS_DOMAIN || "invaliddomain"
+      const decodedToken = jwt.verify(authorization?.split(' ')[1], JWT_KEY) as JwtPayload; //jwt verifica la validez del token de no ser el caso pasa al catch y envia un 401
+      const businessDomain : string = process.env.BUSINESS_MS_DOMAIN || "invaliddomain" //se obtiene el url del servicio de negocios desde las variables de entorno
       console.log(`---- Solicitando informacion al servicio de Negocios ----`);
       const {data} = await axios.get(`${businessDomain}/business/listar?page=${page}&quantity=${USERS_PER_PAGE}&queryString=${queryString}`, {
         headers: {
           "Authorization" : authorization,
           "origin" : `${origin}/auth/listar`
         }
-      });
-      if (data) {
+      }); //se realiza la peticion incluyendo los parametros en la url
+      if (data) { //de volver un objeto, se envian los usuarios retornados por el servicio de negocio con un estado 200
         console.log(`SOLICITUD EXIOTSA`);
         res.status(200).json(data.users);
       }
-      else throw new Error("Error de autorizacion");
+      else throw new Error("Error de autorizacion"); //de no ser el caso tambien retorna un 201 con un mensaje de error acorde
     }catch (err) {
       res.status(401).json({error: "Acceso no autorizado || problema al validar el token o al enviar la solicitud"});
     }

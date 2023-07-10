@@ -17,12 +17,7 @@ app.use(express.json());
 
 //endpoint de prueba que devuelve todos los usuarios (no sigue logica de microservicios y es unicamente para verificacion mientras se desarrolla)
 app.get('/', (req: Request, res: Response) => {
-  User.find({})
-    .then(result => res.json(result))
-    .catch(err => {
-      mongoose.connection.close();
-      console.error(err);
-    });
+  res.status(200).send("Servicio de Autenticacion");
 });
 
 

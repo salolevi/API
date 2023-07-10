@@ -12,6 +12,4 @@ router.post('/login', loginFunction);
 
 router.get('/listar', listFunction);
 
-router.use(serverError);
-
 export default router;

@@ -5,8 +5,6 @@ import { listFunction } from '../controllers/business.controller';
 
 const router: Router = Router();
 
-router.get('/listar', listFunction)  
-
-router.use(serverError);
+router.get('/listar', listFunction);
 
 export default router;
