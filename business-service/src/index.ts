@@ -5,10 +5,8 @@ import './mongo';
 import { User } from './models/User';
 import mongoose from 'mongoose';
 import { notFound } from './middlewares/notFound';
-import businessController from './controllers/business.controller'
-dotenv.config();
+import businessController from './routes/business.routes'
 
-const PORT: Number = Number(process.env.PORT) || 8000;
 const app: Express = express();
 
 app.use(cors());
@@ -22,6 +20,4 @@ app.use('/business', businessController);
 
 app.use(notFound);
 
-app.listen(PORT, () => {
-  console.log(`Escuchando en puerto: ${PORT} || Servicio de negocio`);
-})
+export default app;
