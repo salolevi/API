@@ -1,7 +1,7 @@
 import mongoose, { mongo } from 'mongoose';
 const { model, Schema } = mongoose;
 
-interface IUser {
+export interface IUser {
   email: string,
   password: string,
   dateJoined: Date

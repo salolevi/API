@@ -1,7 +1,7 @@
 import app from '../index'
-import { registerFunction, loginFunction, listFunction } from "../controllers/login.controller";
 import request, {Response} from 'supertest';
-import { User } from '../models/User';
+import { User, IUser } from '../models/User';
+import { HydratedDocument } from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 describe('Endpoint de listar', () => {
@@ -15,7 +15,8 @@ describe('Endpoint de listar', () => {
       });
 
     const {token} = tokenResponse.body;
-    const totalUsers : number = Array.from(await User.find({})).length;
+    const users : Array<any> = Array.from(await User.find({}));
+    const totalUsers : number = users.length;
     const response = await request(app)
       .get('/auth/listar?visualize=true')
       .set('Authorization', `Bearer ${token}`);
@@ -29,7 +30,7 @@ describe('Endpoint de listar', () => {
       .get('/auth/listar?visualize=true');
 
       expect(response.statusCode).toBe(401);
-      expect(response.body).toHaveProperty('error', 'Acceso no autorizado || token incorrecta o problema con el servidor');
+      expect(response.body).toHaveProperty('error', 'Acceso no autorizado || token incorrecto o problema al acceder al servidor');
   });
 
   it('Deberia arrojar un error de autenticacion ya que no se envia un token', async() => {
@@ -43,4 +44,30 @@ describe('Endpoint de listar', () => {
     expect(response.statusCode).toBe(401);
     expect(response.body).toHaveProperty('error', 'Acceso no autorizado || problema al validar el token o al enviar la solicitud');
   });
+
+  it('Deberia devolverme tres usuarios con emails que empiezan en "sa"', async () => {
+
+    const queryString = 'sa';
+    const tokenResponse : Response = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'test2@example.com',
+        password: 'password123'
+      });
+
+    const {token} = tokenResponse.body;
+    const response : Response = await request(app)
+      .get(`/auth/listar?page=0&queryString=${queryString}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    const validResponse : boolean = Array.from(response.body).length === 3 && Array.from(response.body).every((user) => {
+      const newUser : HydratedDocument<IUser> = new User(user);
+      return newUser.email.startsWith('sa')
+    })
+    expect(response.statusCode).toBe(200);
+    expect(validResponse).toBeTruthy();
+    // expect(response.body).
+  })
+
+
 });

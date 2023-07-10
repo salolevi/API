@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction} from 'express';
-import { User } from '../models/User';
+import { User, IUser } from '../models/User';
 import jwt, {JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { IncomingHttpHeaders } from 'http';
+import { HydratedDocument } from 'mongoose';
 
 dotenv.config();
 
@@ -17,15 +18,12 @@ export const listFunction = async (req: Request, res : Response, next : NextFunc
   const page : number = Number(req.query.page) || 0;
   const quantityPerPage = Number(req.query.quantity) || 50;
   const queryString: string = req.query.queryString as string || "";
-  console.log({page, quantityPerPage, queryString});
 
   if (authorization && JWT_KEY && validOrigin) {
     try {
       const decodedToken = jwt.verify(authorization?.split(' ')[1], JWT_KEY) as JwtPayload;
       const { email } : JwtPayload = decodedToken;
-      console.log(decodedToken);
-      const user = await User.findOne({email});
-      console.log(user);
+      const user : HydratedDocument<IUser> | null = await User.findOne({email});
       if (user) res.status(200).json({users: await User.find({email : {$regex: queryString, $options: 'i'}}).skip(page * quantityPerPage).limit(quantityPerPage)});
       else throw new Error("Usuario no encontrado");
     }catch (err) {
